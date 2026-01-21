@@ -1,0 +1,1188 @@
+================================================================================
+EKIGEGA BACKEND - DOCUMENTATION COMPLÈTE DES ENDPOINTS
+================================================================================
+Date: 7 Janvier 2026
+Version: 1.0
+Status: Production-Ready
+
+================================================================================
+1. AUTHENTIFICATION & COMPTES (Accounts)
+================================================================================
+
+Endpoint: POST /api/auth/register/
+Méthode: POST
+Description: Inscription d'un nouvel utilisateur
+Permission: AllowAny
+JSON Request:
+{
+    "email": "user@example.com",
+    "password": "Password123!",
+    "password2": "Password123!",
+    "role": "VENTES",
+    "entreprise": "uuid-de-entreprise"
+}
+JSON Response:
+{
+    "user": {
+        "id": "uuid",
+        "nom": null,
+        "prenom": null,
+        "email": "user@example.com",
+        "telephone": null,
+        "profile": null,
+        "role": "VENTES",
+        "status": "actif",
+        "created_at": "2026-01-07T...",
+        "updated_at": "2026-01-07T..."
+    },
+    "refresh": "eyJ0eXAiOiJKV1QiLCJhbGc...",
+    "access": "eyJ0eXAiOiJKV1QiLCJhbGc..."
+}
+
+---
+
+Endpoint: POST /api/auth/login/
+Méthode: POST
+Description: Connexion utilisateur et obtention des tokens JWT
+Permission: AllowAny
+JSON Request:
+{
+    "email": "user@example.com",
+    "password": "Password123!"
+}
+JSON Response:
+{
+    "refresh": "eyJ0eXAiOiJKV1QiLCJhbGc...",
+    "access": "eyJ0eXAiOiJKV1QiLCJhbGc...",
+    "user": {
+        "id": "uuid",
+        "nom": "Dupont",
+        "prenom": "Jean",
+        "email": "user@example.com",
+        "telephone": "+33612345678",
+        "profile": "https://...",
+        "role": {
+            "id": "uuid",
+            "nom": "VENTES",
+            "description": "Rôle de vente",
+            "permissions": {...}
+        },
+        "status": "actif",
+        "created_at": "2026-01-07T...",
+        "updated_at": "2026-01-07T..."
+    }
+}
+
+---
+
+Endpoint: POST /api/auth/refresh/
+Méthode: POST
+Description: Rafraîchir le token d'accès
+Permission: AllowAny
+JSON Request:
+{
+    "refresh": "eyJ0eXAiOiJKV1QiLCJhbGc..."
+}
+JSON Response:
+{
+    "access": "eyJ0eXAiOiJKV1QiLCJhbGc..."
+}
+
+---
+
+Endpoint: GET /api/auth/me/
+Méthode: GET
+Description: Récupérer le profil de l'utilisateur connecté
+Permission: IsAuthenticated
+Headers:
+    Authorization: Bearer <access_token>
+JSON Response:
+{
+    "id": "uuid",
+    "nom": "Dupont",
+    "prenom": "Jean",
+    "email": "user@example.com",
+    "telephone": "+33612345678",
+    "profile": "https://...",
+    "role": "VENTES",
+    "status": "actif",
+    "created_at": "2026-01-07T...",
+    "updated_at": "2026-01-07T..."
+}
+
+---
+
+Endpoint: POST /api/auth/change-password/
+Méthode: POST
+Description: Changer le mot de passe de l'utilisateur connecté
+Permission: IsAuthenticated
+JSON Request:
+{
+    "old_password": "OldPassword123!",
+    "new_password": "NewPassword456!",
+    "confirm_password": "NewPassword456!"
+}
+JSON Response:
+{
+    "message": "Mot de passe mis à jour avec succès"
+}
+
+---
+
+Endpoint: GET /api/roles/
+Méthode: GET
+Description: Liste tous les rôles disponibles
+Permission: AllowAny
+Query Parameters:
+    - search: Rechercher par nom
+    - ordering: Trier par champ
+JSON Response:
+{
+    "count": 5,
+    "next": "http://.../api/roles/?page=2",
+    "previous": null,
+    "results": [
+        {
+            "id": "uuid",
+            "nom": "SUPER_ADMIN",
+            "description": "Administrateur système",
+            "permissions": {
+                "accounts": ["create", "read", "update", "delete"],
+                "tenants": ["create", "read", "update", "delete"],
+                ...
+            },
+            "created_at": "2026-01-07T...",
+            "updated_at": "2026-01-07T..."
+        },
+        ...
+    ]
+}
+
+---
+
+Endpoint: POST /api/roles/
+Méthode: POST
+Description: Créer un nouveau rôle
+Permission: AllowAny (pour tests, à restreindre en production)
+JSON Request:
+{
+    "nom": "CUSTOM_ROLE",
+    "description": "Description du rôle personnalisé",
+    "permissions": {
+        "products": ["create", "read", "update"],
+        "sales": ["read"]
+    }
+}
+JSON Response:
+{
+    "id": "uuid",
+    "nom": "CUSTOM_ROLE",
+    "description": "Description du rôle personnalisé",
+    "permissions": {...},
+    "created_at": "2026-01-07T...",
+    "updated_at": "2026-01-07T..."
+}
+
+---
+
+Endpoint: GET /api/roles/{id}/
+Méthode: GET
+Description: Récupérer un rôle spécifique
+Permission: AllowAny
+JSON Response: (identique à GET /api/roles/)
+
+---
+
+Endpoint: PUT /api/roles/{id}/
+Méthode: PUT
+Description: Mettre à jour un rôle
+Permission: AllowAny
+JSON Request:
+{
+    "nom": "UPDATED_ROLE",
+    "description": "Description mise à jour",
+    "permissions": {...}
+}
+JSON Response: (identique à POST /api/roles/)
+
+---
+
+Endpoint: DELETE /api/roles/{id}/
+Méthode: DELETE
+Description: Supprimer un rôle
+Permission: AllowAny
+JSON Response: (204 No Content)
+
+================================================================================
+2. GESTION DES ENTREPRISES (Tenants)
+================================================================================
+
+Endpoint: GET /api/tenants/
+Méthode: GET
+Description: Liste toutes les entreprises (tenants)
+Permission: AllowAny (actuellement, restreindre en production)
+Query Parameters:
+    - search: Rechercher par nom, secteur, type
+    - ordering: Trier par champ
+    - page: Pagination (défaut: 1)
+JSON Response:
+{
+    "count": 10,
+    "next": "http://.../api/tenants/?page=2",
+    "previous": null,
+    "results": [
+        {
+            "id": "uuid",
+            "nom": "Entreprise ABC",
+            "secteur": "Technologie",
+            "type": "SARL",
+            "adresse": "123 Rue de la Paix, 75000 Paris",
+            "taille": 50,
+            "created_at": "2026-01-07T...",
+            "updated_at": "2026-01-07T..."
+        },
+        ...
+    ]
+}
+
+---
+
+Endpoint: POST /api/tenants/
+Méthode: POST
+Description: Créer une nouvelle entreprise
+Permission: AllowAny
+JSON Request:
+{
+    "nom": "Nouvelle Entreprise",
+    "secteur": "Finance",
+    "type": "SAS",
+    "adresse": "456 Boulevard des Affaires, 75001 Paris",
+    "taille": 100
+}
+JSON Response:
+{
+    "id": "uuid",
+    "nom": "Nouvelle Entreprise",
+    "secteur": "Finance",
+    "type": "SAS",
+    "adresse": "456 Boulevard des Affaires, 75001 Paris",
+    "taille": 100,
+    "created_at": "2026-01-07T...",
+    "updated_at": "2026-01-07T..."
+}
+
+---
+
+Endpoint: GET /api/tenants/{id}/
+Méthode: GET
+Description: Récupérer une entreprise spécifique
+Permission: AllowAny
+JSON Response: (identique à POST /api/tenants/)
+
+---
+
+Endpoint: PUT /api/tenants/{id}/
+Méthode: PUT
+Description: Mettre à jour une entreprise
+Permission: IsAuthenticated, IsCompanyAdmin
+JSON Request:
+{
+    "nom": "Entreprise Mise à Jour",
+    "secteur": "Service",
+    "type": "SARL",
+    "adresse": "789 Avenue de la République, 75011 Paris",
+    "taille": 200
+}
+JSON Response: (identique à POST /api/tenants/)
+
+---
+
+Endpoint: PATCH /api/tenants/{id}/
+Méthode: PATCH
+Description: Mise à jour partielle d'une entreprise
+Permission: IsAuthenticated, IsCompanyAdmin
+JSON Request:
+{
+    "taille": 250
+}
+JSON Response: (identique à POST /api/tenants/)
+
+---
+
+Endpoint: DELETE /api/tenants/{id}/
+Méthode: DELETE
+Description: Supprimer une entreprise
+Permission: IsAuthenticated, IsCompanyAdmin
+JSON Response: (204 No Content)
+
+================================================================================
+3. GESTION DES PRODUITS (Commerce)
+================================================================================
+
+Endpoint: GET /api/produits/
+Méthode: GET
+Description: Liste tous les produits de l'entreprise
+Permission: IsAuthenticated
+Query Parameters:
+    - search: Rechercher par nom, catégorie
+    - categorie: Filtrer par catégorie
+    - ordering: Trier par champ
+    - page: Pagination
+Headers:
+    Authorization: Bearer <access_token>
+JSON Response:
+{
+    "count": 25,
+    "next": "http://.../api/produits/?page=2",
+    "previous": null,
+    "results": [
+        {
+            "id": "uuid",
+            "nom": "Produit A",
+            "categorie": "Électronique",
+            "prix": "99.99",
+            "quantite": 50,
+            "entreprise": "uuid-entreprise",
+            "created_at": "2026-01-07T...",
+            "updated_at": "2026-01-07T..."
+        },
+        ...
+    ]
+}
+
+---
+
+Endpoint: POST /api/produits/
+Méthode: POST
+Description: Créer un nouveau produit
+Permission: IsAuthenticated
+JSON Request:
+{
+    "nom": "Nouveau Produit",
+    "categorie": "Informatique",
+    "prix": "149.99",
+    "quantite": 100
+}
+JSON Response:
+{
+    "id": "uuid",
+    "nom": "Nouveau Produit",
+    "categorie": "Informatique",
+    "prix": "149.99",
+    "quantite": 100,
+    "entreprise": "uuid-entreprise",
+    "created_at": "2026-01-07T...",
+    "updated_at": "2026-01-07T..."
+}
+
+---
+
+Endpoint: GET /api/produits/{id}/
+Méthode: GET
+Description: Récupérer un produit spécifique
+Permission: IsAuthenticated
+JSON Response: (identique à POST /api/produits/)
+
+---
+
+Endpoint: PUT /api/produits/{id}/
+Méthode: PUT
+Description: Mettre à jour un produit
+Permission: IsAuthenticated
+JSON Request:
+{
+    "nom": "Produit Modifié",
+    "categorie": "Technologie",
+    "prix": "199.99",
+    "quantite": 75
+}
+JSON Response: (identique à POST /api/produits/)
+
+---
+
+Endpoint: PATCH /api/produits/{id}/
+Méthode: PATCH
+Description: Mise à jour partielle d'un produit
+Permission: IsAuthenticated
+JSON Request:
+{
+    "quantite": 80
+}
+JSON Response: (identique à POST /api/produits/)
+
+---
+
+Endpoint: DELETE /api/produits/{id}/
+Méthode: DELETE
+Description: Supprimer un produit
+Permission: IsAuthenticated
+JSON Response: (204 No Content)
+
+================================================================================
+4. GESTION DES VENTES (Commerce)
+================================================================================
+
+Endpoint: GET /api/ventes/
+Méthode: GET
+Description: Liste toutes les ventes de l'entreprise
+Permission: IsAuthenticated
+Query Parameters:
+    - statut: Filtrer par statut (en_attente, payee, annulee, paiement_partiel, rembourse)
+    - search: Rechercher par client
+    - ordering: Trier par champ
+    - page: Pagination
+Headers:
+    Authorization: Bearer <access_token>
+JSON Response:
+{
+    "count": 15,
+    "next": null,
+    "previous": null,
+    "results": [
+        {
+            "id": "uuid",
+            "client": "uuid-partner",
+            "statut": "payee",
+            "items": [
+                {
+                    "produit": "uuid-produit",
+                    "quantite": 5,
+                    "prix_unitaire": "99.99"
+                },
+                ...
+            ],
+            "created_at": "2026-01-07T...",
+            "updated_at": "2026-01-07T..."
+        },
+        ...
+    ]
+}
+
+---
+
+Endpoint: POST /api/ventes/
+Méthode: POST
+Description: Créer une nouvelle vente
+Permission: IsAuthenticated
+JSON Request:
+{
+    "client": "uuid-partner",
+    "statut": "en_attente",
+    "items": [
+        {
+            "produit": "uuid-produit-1",
+            "quantite": 3,
+            "prix_unitaire": "99.99"
+        },
+        {
+            "produit": "uuid-produit-2",
+            "quantite": 2,
+            "prix_unitaire": "149.99"
+        }
+    ]
+}
+JSON Response:
+{
+    "id": "uuid",
+    "client": "uuid-partner",
+    "statut": "en_attente",
+    "items": [...],
+    "created_at": "2026-01-07T...",
+    "updated_at": "2026-01-07T..."
+}
+
+---
+
+Endpoint: GET /api/ventes/{id}/
+Méthode: GET
+Description: Récupérer une vente spécifique
+Permission: IsAuthenticated
+JSON Response: (identique à POST /api/ventes/)
+
+---
+
+Endpoint: PUT /api/ventes/{id}/
+Méthode: PUT
+Description: Mettre à jour une vente
+Permission: IsAuthenticated
+JSON Request:
+{
+    "client": "uuid-partner",
+    "statut": "payee",
+    "items": [...]
+}
+JSON Response: (identique à POST /api/ventes/)
+
+---
+
+Endpoint: PATCH /api/ventes/{id}/
+Méthode: PATCH
+Description: Mise à jour partielle d'une vente
+Permission: IsAuthenticated
+JSON Request:
+{
+    "statut": "annulee"
+}
+JSON Response: (identique à POST /api/ventes/)
+
+---
+
+Endpoint: DELETE /api/ventes/{id}/
+Méthode: DELETE
+Description: Supprimer une vente
+Permission: IsAuthenticated
+JSON Response: (204 No Content)
+
+================================================================================
+5. GESTION DES DÉPENSES (Finance)
+================================================================================
+
+Endpoint: GET /api/depenses/
+Méthode: GET
+Description: Liste toutes les dépenses de l'entreprise
+Permission: IsAuthenticated
+Query Parameters:
+    - categorie: Filtrer par catégorie
+    - type: Filtrer par type
+    - search: Rechercher par description
+    - ordering: Trier par champ
+    - page: Pagination
+Headers:
+    Authorization: Bearer <access_token>
+JSON Response:
+{
+    "count": 30,
+    "next": "http://.../api/depenses/?page=2",
+    "previous": null,
+    "results": [
+        {
+            "id": "uuid",
+            "categorie": "Fournitures",
+            "description": "Achat de fournitures de bureau",
+            "montant": "250.50",
+            "type": "Fournitures",
+            "justificatif": "https://.../facture.pdf",
+            "entreprise": "uuid-entreprise",
+            "created_at": "2026-01-07T...",
+            "updated_at": "2026-01-07T..."
+        },
+        ...
+    ]
+}
+
+---
+
+Endpoint: POST /api/depenses/
+Méthode: POST
+Description: Créer une nouvelle dépense
+Permission: IsAuthenticated
+JSON Request (multipart/form-data pour les fichiers):
+{
+    "categorie": "Transport",
+    "description": "Carburant véhicule entreprise",
+    "montant": "75.00",
+    "type": "Transport",
+    "justificatif": <fichier PDF ou image>
+}
+JSON Response:
+{
+    "id": "uuid",
+    "categorie": "Transport",
+    "description": "Carburant véhicule entreprise",
+    "montant": "75.00",
+    "type": "Transport",
+    "justificatif": "https://.../justificatif.pdf",
+    "entreprise": "uuid-entreprise",
+    "created_at": "2026-01-07T...",
+    "updated_at": "2026-01-07T..."
+}
+
+---
+
+Endpoint: GET /api/depenses/{id}/
+Méthode: GET
+Description: Récupérer une dépense spécifique
+Permission: IsAuthenticated
+JSON Response: (identique à POST /api/depenses/)
+
+---
+
+Endpoint: PUT /api/depenses/{id}/
+Méthode: PUT
+Description: Mettre à jour une dépense
+Permission: IsAuthenticated
+JSON Request:
+{
+    "categorie": "Transport",
+    "description": "Carburant véhicule (mis à jour)",
+    "montant": "85.00",
+    "type": "Transport",
+    "justificatif": <fichier optionnel>
+}
+JSON Response: (identique à POST /api/depenses/)
+
+---
+
+Endpoint: PATCH /api/depenses/{id}/
+Méthode: PATCH
+Description: Mise à jour partielle d'une dépense
+Permission: IsAuthenticated
+JSON Request:
+{
+    "montant": "90.00"
+}
+JSON Response: (identique à POST /api/depenses/)
+
+---
+
+Endpoint: DELETE /api/depenses/{id}/
+Méthode: DELETE
+Description: Supprimer une dépense
+Permission: IsAuthenticated
+JSON Response: (204 No Content)
+
+================================================================================
+6. GESTION DES PARTENAIRES (Partners - Clients et Fournisseurs)
+================================================================================
+
+Endpoint: GET /api/partners/
+Méthode: GET
+Description: Liste tous les partenaires (clients et fournisseurs)
+Permission: IsAuthenticated
+Query Parameters:
+    - type: Filtrer par type (client, fournisseur)
+    - search: Rechercher par nom, email, téléphone
+    - ordering: Trier par champ
+    - page: Pagination
+Headers:
+    Authorization: Bearer <access_token>
+JSON Response:
+{
+    "count": 45,
+    "next": "http://.../api/partners/?page=2",
+    "previous": null,
+    "results": [
+        {
+            "id": "uuid",
+            "type": "client",
+            "nom": "Entreprise Client",
+            "prenom": "",
+            "email": "contact@client.com",
+            "telephone": "+33712345678",
+            "adresse": "123 Rue de Client, 75000 Paris",
+            "entreprise": "uuid-entreprise",
+            "created_at": "2026-01-07T...",
+            "updated_at": "2026-01-07T..."
+        },
+        ...
+    ]
+}
+
+---
+
+Endpoint: POST /api/partners/
+Méthode: POST
+Description: Créer un nouveau partenaire
+Permission: IsAuthenticated
+JSON Request:
+{
+    "type": "client",
+    "nom": "Nouveau Client",
+    "prenom": "Jean",
+    "email": "jean.nouveau@client.com",
+    "telephone": "+33798765432",
+    "adresse": "456 Avenue du Client, 75001 Paris"
+}
+JSON Response:
+{
+    "id": "uuid",
+    "type": "client",
+    "nom": "Nouveau Client",
+    "prenom": "Jean",
+    "email": "jean.nouveau@client.com",
+    "telephone": "+33798765432",
+    "adresse": "456 Avenue du Client, 75001 Paris",
+    "entreprise": "uuid-entreprise",
+    "created_at": "2026-01-07T...",
+    "updated_at": "2026-01-07T..."
+}
+
+---
+
+Endpoint: GET /api/partners/{id}/
+Méthode: GET
+Description: Récupérer un partenaire spécifique
+Permission: IsAuthenticated
+JSON Response: (identique à POST /api/partners/)
+
+---
+
+Endpoint: PUT /api/partners/{id}/
+Méthode: PUT
+Description: Mettre à jour un partenaire
+Permission: IsAuthenticated
+JSON Request:
+{
+    "type": "fournisseur",
+    "nom": "Client Modifié",
+    "prenom": "Pierre",
+    "email": "pierre.modifie@client.com",
+    "telephone": "+33612345678",
+    "adresse": "789 Rue Modifiée, 75011 Paris"
+}
+JSON Response: (identique à POST /api/partners/)
+
+---
+
+Endpoint: PATCH /api/partners/{id}/
+Méthode: PATCH
+Description: Mise à jour partielle d'un partenaire
+Permission: IsAuthenticated
+JSON Request:
+{
+    "email": "nouveau.email@client.com"
+}
+JSON Response: (identique à POST /api/partners/)
+
+---
+
+Endpoint: DELETE /api/partners/{id}/
+Méthode: DELETE
+Description: Supprimer un partenaire
+Permission: IsAuthenticated
+JSON Response: (204 No Content)
+
+================================================================================
+7. GESTION DES ABONNEMENTS (Subscriptions)
+================================================================================
+
+Endpoint: GET /api/abonnements/
+Méthode: GET
+Description: Liste tous les abonnements de l'entreprise
+Permission: IsAuthenticated
+Query Parameters:
+    - type: Filtrer par type d'abonnement
+    - status: Filtrer par statut
+    - search: Rechercher
+    - ordering: Trier par champ
+    - page: Pagination
+Headers:
+    Authorization: Bearer <access_token>
+JSON Response:
+{
+    "count": 5,
+    "next": null,
+    "previous": null,
+    "results": [
+        {
+            "id": "uuid",
+            "type": "Premium",
+            "date_debut": "2026-01-01",
+            "date_fin": "2026-12-31",
+            "prix": "999.99",
+            "status": "actif",
+            "fonctionnalites": ["Feature1", "Feature2", "Feature3"],
+            "entreprise": "uuid-entreprise",
+            "created_at": "2026-01-07T...",
+            "updated_at": "2026-01-07T..."
+        },
+        ...
+    ]
+}
+
+---
+
+Endpoint: POST /api/abonnements/
+Méthode: POST
+Description: Créer un nouvel abonnement
+Permission: IsAuthenticated
+JSON Request:
+{
+    "type": "Standard",
+    "date_debut": "2026-01-15",
+    "date_fin": "2027-01-15",
+    "prix": "499.99",
+    "status": "actif",
+    "fonctionnalites": ["Analytics", "Support", "Export"]
+}
+JSON Response:
+{
+    "id": "uuid",
+    "type": "Standard",
+    "date_debut": "2026-01-15",
+    "date_fin": "2027-01-15",
+    "prix": "499.99",
+    "status": "actif",
+    "fonctionnalites": ["Analytics", "Support", "Export"],
+    "entreprise": "uuid-entreprise",
+    "created_at": "2026-01-07T...",
+    "updated_at": "2026-01-07T..."
+}
+
+---
+
+Endpoint: GET /api/abonnements/{id}/
+Méthode: GET
+Description: Récupérer un abonnement spécifique
+Permission: IsAuthenticated
+JSON Response: (identique à POST /api/abonnements/)
+
+---
+
+Endpoint: PUT /api/abonnements/{id}/
+Méthode: PUT
+Description: Mettre à jour un abonnement
+Permission: IsAuthenticated
+JSON Request:
+{
+    "type": "Premium",
+    "date_debut": "2026-01-15",
+    "date_fin": "2026-12-31",
+    "prix": "1299.99",
+    "status": "actif",
+    "fonctionnalites": ["Analytics", "Support", "Export", "API", "Custom"]
+}
+JSON Response: (identique à POST /api/abonnements/)
+
+---
+
+Endpoint: PATCH /api/abonnements/{id}/
+Méthode: PATCH
+Description: Mise à jour partielle d'un abonnement
+Permission: IsAuthenticated
+JSON Request:
+{
+    "status": "suspendu"
+}
+JSON Response: (identique à POST /api/abonnements/)
+
+---
+
+Endpoint: DELETE /api/abonnements/{id}/
+Méthode: DELETE
+Description: Supprimer un abonnement
+Permission: IsAuthenticated
+JSON Response: (204 No Content)
+
+================================================================================
+8. GESTION DES FORMATIONS VIDÉO (Education)
+================================================================================
+
+Endpoint: GET /api/videos/
+Méthode: GET
+Description: Liste toutes les vidéos de formation
+Permission: IsAuthenticated
+Query Parameters:
+    - langue: Filtrer par langue
+    - status: Filtrer par statut
+    - search: Rechercher par titre
+    - ordering: Trier par champ
+    - page: Pagination
+Headers:
+    Authorization: Bearer <access_token>
+JSON Response:
+{
+    "count": 20,
+    "next": "http://.../api/videos/?page=2",
+    "previous": null,
+    "results": [
+        {
+            "id": "uuid",
+            "titre": "Introduction à Django",
+            "url": "https://youtube.com/watch?v=...",
+            "duree": 1800,
+            "langue": "fr",
+            "status": "actif",
+            "date_genere": "2026-01-07T10:30:00Z",
+            "created_at": "2026-01-07T...",
+            "updated_at": "2026-01-07T..."
+        },
+        ...
+    ]
+}
+
+---
+
+Endpoint: POST /api/videos/
+Méthode: POST
+Description: Créer une nouvelle vidéo de formation
+Permission: IsAuthenticated
+JSON Request:
+{
+    "titre": "Gestion d'entreprise avancée",
+    "url": "https://vimeo.com/123456789",
+    "duree": 3600,
+    "langue": "fr",
+    "status": "actif"
+}
+JSON Response:
+{
+    "id": "uuid",
+    "titre": "Gestion d'entreprise avancée",
+    "url": "https://vimeo.com/123456789",
+    "duree": 3600,
+    "langue": "fr",
+    "status": "actif",
+    "date_genere": "2026-01-07T14:45:00Z",
+    "created_at": "2026-01-07T...",
+    "updated_at": "2026-01-07T..."
+}
+
+---
+
+Endpoint: GET /api/videos/{id}/
+Méthode: GET
+Description: Récupérer une vidéo spécifique
+Permission: IsAuthenticated
+JSON Response: (identique à POST /api/videos/)
+
+---
+
+Endpoint: PUT /api/videos/{id}/
+Méthode: PUT
+Description: Mettre à jour une vidéo
+Permission: IsAuthenticated
+JSON Request:
+{
+    "titre": "Gestion d'entreprise avancée (v2)",
+    "url": "https://vimeo.com/987654321",
+    "duree": 4200,
+    "langue": "fr",
+    "status": "inactif"
+}
+JSON Response: (identique à POST /api/videos/)
+
+---
+
+Endpoint: PATCH /api/videos/{id}/
+Méthode: PATCH
+Description: Mise à jour partielle d'une vidéo
+Permission: IsAuthenticated
+JSON Request:
+{
+    "status": "archivé"
+}
+JSON Response: (identique à POST /api/videos/)
+
+---
+
+Endpoint: DELETE /api/videos/{id}/
+Méthode: DELETE
+Description: Supprimer une vidéo
+Permission: IsAuthenticated
+JSON Response: (204 No Content)
+
+================================================================================
+9. LOGS D'AUDIT (Logs)
+================================================================================
+
+Endpoint: GET /api/logs/
+Méthode: GET
+Description: Liste tous les logs d'audit
+Permission: IsAuthenticated, ReadOnlyModelViewSet
+Query Parameters:
+    - action: Filtrer par action
+    - user: Filtrer par utilisateur
+    - object_type: Filtrer par type d'objet
+    - date_range: Filtrer par plage de dates
+    - search: Rechercher
+    - ordering: Trier par champ
+    - page: Pagination
+Headers:
+    Authorization: Bearer <access_token>
+JSON Response:
+{
+    "count": 500,
+    "next": "http://.../api/logs/?page=2",
+    "previous": null,
+    "results": [
+        {
+            "id": "uuid",
+            "action": "CREATE",
+            "method": "POST",
+            "path": "/api/produits/",
+            "object_type": "Produit",
+            "object_id": "uuid-produit",
+            "ip_address": "192.168.1.1",
+            "user_agent": "Mozilla/5.0 ...",
+            "status_code": 201,
+            "user": "uuid-user",
+            "entreprise": "uuid-entreprise",
+            "created_at": "2026-01-07T15:30:00Z"
+        },
+        ...
+    ]
+}
+
+---
+
+Endpoint: GET /api/logs/{id}/
+Méthode: GET
+Description: Récupérer un log d'audit spécifique
+Permission: IsAuthenticated
+JSON Response: (identique à GET /api/logs/)
+
+Note: Les logs ne peuvent pas être créés, modifiés ou supprimés directement.
+Ils sont générés automatiquement par le middleware et les signaux Django.
+
+================================================================================
+10. ANALYTICS ET TABLEAUX DE BORD
+================================================================================
+
+Endpoint: GET /api/analytics/dashboard/
+Méthode: GET
+Description: Récupérer le tableau de bord analytique complet
+Permission: IsAuthenticated
+Headers:
+    Authorization: Bearer <access_token>
+JSON Response:
+{
+    "cashflow": {
+        "revenus": {
+            "total": "15000.00",
+            "mois_courant": "5000.00",
+            "tendance": "up"
+        },
+        "depenses": {
+            "total": "8000.00",
+            "mois_courant": "2500.00",
+            "tendance": "stable"
+        },
+        "solde": {
+            "net": "7000.00",
+            "par_mois": "2500.00"
+        }
+    },
+    "kpis": {
+        "total_ventes": 150,
+        "ventes_mois_courant": 45,
+        "revenue_total": "150000.00",
+        "revenue_mois_courant": "50000.00",
+        "client_acquisition_cost": "333.33",
+        "average_order_value": "1000.00",
+        "customer_lifetime_value": "5000.00"
+    },
+    "sales_trend": {
+        "janvier": 12000.00,
+        "février": 13500.00,
+        "mars": 15000.00,
+        "avril": 14200.00,
+        "mai": 16500.00,
+        "juin": 18000.00,
+        ...
+    }
+}
+
+---
+
+Endpoint: GET /api/analytics/cashflow/
+Méthode: GET
+Description: Récupérer le résumé de trésorerie
+Permission: IsAuthenticated
+Headers:
+    Authorization: Bearer <access_token>
+JSON Response:
+{
+    "revenus": {
+        "total": "15000.00",
+        "mois_courant": "5000.00",
+        "tendance": "up"
+    },
+    "depenses": {
+        "total": "8000.00",
+        "mois_courant": "2500.00",
+        "tendance": "stable"
+    },
+    "solde": {
+        "net": "7000.00",
+        "par_mois": "2500.00"
+    }
+}
+
+================================================================================
+11. ENDPOINTS HEALTH CHECK
+================================================================================
+
+Endpoint: GET /
+Méthode: GET
+Description: Health check du serveur
+Permission: AllowAny
+JSON Response:
+{
+    "status": "ok",
+    "timestamp": "2026-01-07T15:45:00Z"
+}
+
+================================================================================
+12. DOCUMENTATION SWAGGER/REDOC
+================================================================================
+
+Endpoint: GET /swagger/
+Méthode: GET
+Description: Documentation interactive (Swagger UI)
+Permission: AllowAny
+Browser: Ouvre l'interface Swagger
+
+---
+
+Endpoint: GET /redoc/
+Méthode: GET
+Description: Documentation (ReDoc)
+Permission: AllowAny
+Browser: Ouvre l'interface ReDoc
+
+---
+
+Endpoint: GET /swagger.json
+Méthode: GET
+Description: Schéma OpenAPI en JSON
+Permission: AllowAny
+Response: Schéma OpenAPI complet
+
+================================================================================
+CONVENTIONS ET RÉSUMÉ
+================================================================================
+
+BASE URL: http://localhost:8000/api/
+
+Formats acceptés:
+- Request: application/json, multipart/form-data (pour les fichiers)
+- Response: application/json
+
+Authentification:
+- Méthode: Bearer Token (JWT)
+- Header: Authorization: Bearer <access_token>
+
+Pagination:
+- Paramètre: ?page=1
+- Réponse inclut: count, next, previous, results
+
+Filtrage:
+- Chaque ressource supporte: ?search=..., ?ordering=...
+- Filtres spécifiques par endpoint (voir ci-dessus)
+
+Codes de statut HTTP:
+- 200: OK (GET, PUT, PATCH réussis)
+- 201: Créé (POST réussi)
+- 204: Pas de contenu (DELETE réussi)
+- 400: Requête invalide
+- 401: Non authentifié
+- 403: Permission refusée
+- 404: Ressource non trouvée
+- 500: Erreur serveur
+
+Données multi-tenant:
+- Les ressources sont filtrées par entreprise (sauf rôles et entreprises)
+- Les superusers peuvent accéder à toutes les données
+
+Permissions résumées:
+- AllowAny: Accessible sans authentification
+- IsAuthenticated: Authentification requise
+- IsCompanyAdmin: Admin de l'entreprise
+- HasRolePermission: Basée sur les rôles et permissions
+
+================================================================================
+FIN DE LA DOCUMENTATION
+================================================================================
+Version: 1.0 - 7 Janvier 2026
+Mainteneur: Ekigega Backend Team

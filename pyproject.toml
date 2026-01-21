@@ -1,0 +1,37 @@
+[tool.black]
+line-length = 88
+# Target Python versions (adjust if your project uses a different minor version)
+target-version = ['py311']
+skip-string-normalization = false
+
+[tool.isort]
+profile = "black"
+line_length = 88
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+skip = ["migrations", ".venv", "venv", "build", "dist", ".git"]
+known_first_party = ["apps", "ekigega"]
+sections = ["FUTURE", "STDLIB", "THIRDPARTY", "DJANGO", "FIRSTPARTY", "LOCALFOLDER"]
+known_django = ["django"]
+
+[tool.ruff]
+line-length = 88
+exclude = ["**/migrations/**", ".venv", "venv", "build", "dist", ".git"]
+extend-ignore = ["E203", "W503"]
+# Select a broad set of error categories; adjust to taste
+select = ["E", "F", "W", "C", "B", "I", "N", "Q"]
+
+[tool.ruff.per-file-ignores]
+"apps/*/migrations/**" = ["ALL"]
+
+[tool.flake8]
+max-line-length = 88
+extend-ignore = ["E203", "W503"]
+exclude = [".git", "__pycache__", ".venv", "venv", "build", "dist", "apps/*/migrations/*"]
+max-complexity = 12
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
