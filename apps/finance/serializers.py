@@ -89,7 +89,12 @@ class StockSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Stock
-        fields = "__all__"
+        fields = [
+            "id", "quantite", "prix_achat", "date_entree",
+            "entreprise", "produit", "fournisseur",
+            "produit_detail", "fournisseur_detail",
+            "created_at", "updated_at"
+        ]
         read_only_fields = ("entreprise",)
     
     def validate_quantite(self, value):
