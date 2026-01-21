@@ -73,13 +73,13 @@ class StockSerializer(serializers.ModelSerializer):
     # Champs écriture (POST / PUT)
     produit = serializers.PrimaryKeyRelatedField(
         queryset=Produit.objects.all(),
-        source="produit",
+        # source="produit",
         write_only=True
     )
 
     fournisseur = serializers.PrimaryKeyRelatedField(
         queryset=Partner.objects.filter(type="fournisseur"),
-        source="fournisseur",
+        # source="fournisseur",
         write_only=True
     )
 
