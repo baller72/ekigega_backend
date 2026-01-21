@@ -84,8 +84,8 @@ class StockSerializer(serializers.ModelSerializer):
     )
 
     # Champs lecture (GET)
-    produit = ProduitSerializer(read_only=True)
-    fournisseur = PartnerSerializer(read_only=True)
+    produit_detail = ProduitSerializer(read_only=True)
+    fournisseur_detail = PartnerSerializer(read_only=True)
 
     class Meta:
         model = Stock
