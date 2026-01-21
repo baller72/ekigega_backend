@@ -1,5 +1,8 @@
 from rest_framework import serializers
 
+from apps.commerce.models import Produit
+from apps.partners.models import Partner
+
 from apps.commerce.serializers import ProduitSerializer
 from apps.partners.serializers import PartnerSerializer
 
