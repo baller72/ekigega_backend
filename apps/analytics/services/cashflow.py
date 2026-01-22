@@ -5,7 +5,7 @@ from dateutil.relativedelta import relativedelta
 
 from apps.analytics.services.cache import cache_get_or_set
 from apps.commerce.models import Vente
-from apps.finance.models import Depense
+from apps.finance.models import Depense, Stock
 
 
 def cashflow_summary(entreprise):
@@ -121,6 +121,11 @@ def cashflow_previous_month(entreprise):
             output_field=DecimalField(max_digits=20, decimal_places=2),
         )
 
+        stock_total_expr = ExpressionWrapper(
+            F("quantite") * F("prix_achat"),
+            output_field=DecimalField(max_digits=20, decimal_places=2),
+        )
+
         cash_in = (
             Vente.objects.filter(
                 entreprise=entreprise,
@@ -137,6 +142,14 @@ def cashflow_previous_month(entreprise):
                 created_at__gte=start_of_previous_month,
                 created_at__lt=start_of_current_month
             ).aggregate(total=Sum("montant"))["total"]
+            or 0
+        ) + (
+            Stock.objects.filter(
+                entreprise=entreprise,
+                created_at__gte=start_of_previous_month,
+                created_at__lte=start_of_current_month,
+                prix_achat__isnull=False
+            ).aggregate(total=Sum(stock_total_expr))["total"]
             or 0
         )
 
