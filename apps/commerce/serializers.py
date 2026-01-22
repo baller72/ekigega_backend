@@ -4,6 +4,7 @@ from rest_framework import serializers
 
 from django.db import transaction
 
+from apps.partners.models import Partner
 from apps.partners.serializers import PartnerSerializer
 
 from .models import Categorie, Produit, Vente
