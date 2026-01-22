@@ -148,12 +148,13 @@ class VenteSerializer(serializers.ModelSerializer):
       "prix_vente": "52.50",
       "statut": "payee",
       "created_at": "2026-01-09T10:30:00Z"
-    }
-    ```
     """
 
-    client = PartnerSerializer(read_only=True)
-    produit = ProduitSerializer(read_only=True)
+    client = serializers.PrimaryKeyRelatedField(queryset=Partner.objects.filter(type="client"), write_only=True)
+    produit = serializers.PrimaryKeyRelatedField(queryset=Produit.objects.all(), write_only=True)
+
+    client_detail = PartnerSerializer(source="client", read_only=True)
+    produit_detail = ProduitSerializer(source="produit", read_only=True)
 
     class Meta:
         model = Vente
@@ -161,6 +162,8 @@ class VenteSerializer(serializers.ModelSerializer):
             "id",
             "client",
             "produit",
+            "client_detail",
+            "produit_detail",
             "quantite",
             "prix_unitaire",
             "prix_vente",
