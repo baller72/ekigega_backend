@@ -107,6 +107,10 @@ swagger_info = openapi.Info(
     - **Dashboard** : `GET /dashboard/` — KPIs synthétiques
     - **Cashflow** : `GET /cashflow/` — entrées/sorties de trésorerie
 
+    ### Exports (`/api/exports/`)
+    - **Trigger** : `POST /trigger/` — Déclencher un export asynchrone (Excel/CSV)
+    - **History** : `GET /history/` — Voir l'historique des exports générés
+
     ## Payload Exemple : Créer une Vente
 
     ```json
@@ -182,6 +186,7 @@ urlpatterns = [
     path("api/", include(router.urls)),
     path("api/auth/", include("apps.accounts.urls")),
     path("api/analytics/", include("apps.analytics.urls")),
+    path("api/exports/", include("apps.exports.urls")),
 
     path("api/ml/analytics/expenses/", ExpenseMLAnalyticsView.as_view()),
     path("api/ml/analytics/sales/", SalesMLAnalyticsView.as_view()),
