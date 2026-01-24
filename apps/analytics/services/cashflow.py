@@ -143,15 +143,7 @@ def cashflow_previous_month(entreprise):
                 created_at__lt=start_of_current_month
             ).aggregate(total=Sum("montant"))["total"]
             or 0
-        ) + (
-            Stock.objects.filter(
-                entreprise=entreprise,
-                created_at__gte=start_of_previous_month,
-                created_at__lte=start_of_current_month,
-                prix_achat__isnull=False
-            ).aggregate(total=Sum(stock_total_expr))["total"]
-            or 0
-        )
+        ) 
 
         return {
             "cash_in": float(cash_in),
