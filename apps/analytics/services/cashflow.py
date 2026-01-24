@@ -121,10 +121,10 @@ def cashflow_previous_month(entreprise):
             output_field=DecimalField(max_digits=20, decimal_places=2),
         )
 
-        stock_total_expr = ExpressionWrapper(
-            F("quantite") * F("prix_achat"),
-            output_field=DecimalField(max_digits=20, decimal_places=2),
-        )
+        # stock_total_expr = ExpressionWrapper(
+        #     F("quantite") * F("prix_achat"),
+        #     output_field=DecimalField(max_digits=20, decimal_places=2),
+        # )
 
         cash_in = (
             Vente.objects.filter(

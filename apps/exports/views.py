@@ -25,6 +25,7 @@ class ExportViewSet(viewsets.ViewSet):
         ),
         tags=['Exports']
     )
+
     @action(detail=False, methods=["POST"])
     def generate(self, request):
         module = request.data.get("module")
@@ -84,6 +85,7 @@ class ExportTriggerView(APIView):
         responses={202: "Tâche d'export déclenchée."},
         tags=['Exports']
     )
+
     def post(self, request):
         module = request.data.get("module")
         format = request.data.get("format", "CSV")
@@ -98,6 +100,7 @@ class ExportHistoryView(APIView):
         responses={200: ExportHistorySerializer(many=True)},
         tags=['Exports']
     )
+    
     def get(self, request):
         exports = ExportHistory.objects.all()
         serializer = ExportHistorySerializer(exports, many=True)

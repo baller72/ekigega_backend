@@ -9,6 +9,9 @@ from apps.partners.models import Partner
 def global_kpis(entreprise):
     key = f"kpis:{entreprise.id}"
 
+    now = timezone.now()
+    start_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+
     def compute():
         total_clients = Partner.objects.filter(
             entreprise=entreprise, type="client"
@@ -20,6 +23,7 @@ def global_kpis(entreprise):
             F("prix_unitaire") * F("quantite"),
             output_field=DecimalField(max_digits=20, decimal_places=2),
         )
+
         ca = (
             Vente.objects.filter(entreprise=entreprise).aggregate(
                 total=Sum(line_total)
@@ -38,6 +42,14 @@ def global_kpis(entreprise):
         total_stock = (
             Stock.objects.filter(entreprise=entreprise).aggregate(
                 total=Sum("quantite")
+            )["total"]
+            or 0
+        )
+
+        total_stock_month = (
+            Stock.objects.filter(entreprise=entreprise).aggregate(
+                total=Sum("quantite"),
+                created_at__gte=start_of_month
             )["total"]
             or 0
         )
@@ -69,6 +81,7 @@ def global_kpis(entreprise):
             "chiffre_affaire": ca,
             "depenses": depenses,
             "total_stock": total_stock,
+            "total_stock_month": total_stock_month,
             "panier_moyen": panier_moyen,
             "top_products": top_products,
         }

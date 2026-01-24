@@ -1,11 +1,10 @@
 from celery import shared_task
 from django.contrib.auth import get_user_model
 from apps.commerce.models import Vente, Produit
-from apps.finance.models import Depense
+from apps.finance.models import Depense, Stock
 from apps.subscriptions.models import Abonnement
 from apps.exports.models import ExportHistory
 from apps.exports.utils import export_to_csv, export_to_excel
-import random
 
 User = get_user_model()
 
@@ -22,6 +21,9 @@ def scheduled_export(module, format="CSV"):
     elif module == "Dépenses":
         queryset = Depense.objects.all()
         fields = ["id", "categorie", "description", "montant", "type", "created_at"]
+    elif module == "Stock":
+        queryset = Stock.objects.all()
+        fields = ["id", "produit", "quantite", "prix_achat", "prix_vente", "created_at"]
     elif module == "Abonnements":
         queryset = Abonnement.objects.all()
         fields = ["id", "client", "plan", "statut", "start_date", "end_date"]
