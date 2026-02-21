@@ -5,8 +5,8 @@ from apps.core.models import BaseModel, TenantModel
 
 class Abonnement(TenantModel):
     STATUS = [
-        ("active", "Active"),
-        ("expired", "Expired"),
+        ("actif", "Active"),
+        ("expire", "Expired"),
     ]
 
     TYPES = [
