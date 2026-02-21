@@ -47,11 +47,9 @@ def global_kpis(entreprise):
         )
 
         total_stock_month = (
-            Stock.objects.filter(entreprise=entreprise).aggregate(
-                total=Sum("quantite"),
-                created_at__gte=start_of_month
-            )["total"]
-            or 0
+            Stock.objects.filter(entreprise=entreprise, created_at__gte=start_of_month)
+            .aggregate(total=Sum("quantite"))
+            .get("total") or 0
         )
 
         # panier moyen
