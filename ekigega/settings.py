@@ -143,16 +143,16 @@ WSGI_APPLICATION = "ekigega.wsgi.application"
 
 DATABASES = {
     "default": {
-        # "ENGINE": os.getenv("DB_ENGINE"),
-        # "NAME": os.getenv("DB_NAME"),
-        # "USER": os.getenv("DB_USER"),
-        # "PASSWORD": os.getenv("DB_PASSWORD"),
-        # "HOST": os.getenv("DB_HOST"),
-        # "PORT": os.getenv("DB_PORT"),
+        "ENGINE": os.getenv("DB_ENGINE"),
+        "NAME": os.getenv("DB_NAME"),
+        "USER": os.getenv("DB_USER"),
+        "PASSWORD": os.getenv("DB_PASSWORD"),
+        "HOST": os.getenv("DB_HOST"),
+        "PORT": os.getenv("DB_PORT"),
     }
 }
 
-DATABASES["default"] = dj_database_url.parse(os.getenv("DJ_DATABASE_URL"))
+# DATABASES["default"] = dj_database_url.parse(os.getenv("DJ_DATABASE_URL"))
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -172,12 +172,22 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+CELERY_BROKER_TRANSPORT_OPTIONS = {
+    'visibility_timeout': 3600,
+    'socket_timeout': 120,
+    'retry_on_timeout': True,
+}
+
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": os.getenv("REDIS_URL"),
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            'SOCKET_CONNECT_TIMEOUT': 5,
+            'SOCKET_TIMEOUT': 5,
+            'RETRY_ON_TIMEOUT': True,
+            'SOCKET_KEEPALIVE': True,
         },
         "KEY_PREFIX": os.getenv("CACHE_KEY_PREFIX"),
     }
