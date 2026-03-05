@@ -131,7 +131,8 @@ class RequestPasswordResetView(generics.CreateAPIView):
         Utilise un template HTML et envoie une version texte aussi.
         """
         user = reset_token.user
-        reset_link = f"{settings.FRONTEND_URL}/reset-password/{reset_token.token}"
+        # reset_link = f"{settings.FRONTEND_URL}/reset-password/{reset_token.token}"
+        reset_link  = "http://localhost/e-kigega-ui/public/recover-pw.php"
         
         context = {
             "user": user,
