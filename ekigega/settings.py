@@ -15,12 +15,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DJANGO_DEBUG")
+DEBUG = os.environ.get("DJANGO_DEBUG")
 
-ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",")
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "").split(",")
 
 # Application definition
 
@@ -69,7 +69,7 @@ MIDDLEWARE = [
 
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "").split(",")
+CORS_ALLOWED_ORIGINS = os.environ.get("CORS_ALLOWED_ORIGINS", "").split(",")
 # CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
@@ -89,13 +89,13 @@ REST_FRAMEWORK = {
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(
-        days=int(os.getenv("JWT_ACCESS_TOKEN_LIFETIME_DAYS"))
+        days=int(os.environ.get("JWT_ACCESS_TOKEN_LIFETIME_DAYS"))
     ),
     "REFRESH_TOKEN_LIFETIME": timedelta(
-        days=int(os.getenv("JWT_REFRESH_TOKEN_LIFETIME_DAYS"))
+        days=int(os.environ.get("JWT_REFRESH_TOKEN_LIFETIME_DAYS"))
     ),
-    "ROTATE_REFRESH_TOKENS": os.getenv("JWT_ROTATE_REFRESH_TOKENS"),
-    "BLACKLIST_AFTER_ROTATION": os.getenv("JWT_BLACKLIST_AFTER_ROTATION"),
+    "ROTATE_REFRESH_TOKENS": os.environ.get("JWT_ROTATE_REFRESH_TOKENS"),
+    "BLACKLIST_AFTER_ROTATION": os.environ.get("JWT_BLACKLIST_AFTER_ROTATION"),
     "AUTH_HEADER_TYPES": ("Bearer",),
     "USER_ID_FIELD": "id",
     "USER_ID_CLAIM": "user_id",
@@ -143,16 +143,16 @@ WSGI_APPLICATION = "ekigega.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": os.getenv("DB_ENGINE"),
-        "NAME": os.getenv("DB_NAME"),
-        "USER": os.getenv("DB_USER"),
-        "PASSWORD": os.getenv("DB_PASSWORD"),
-        "HOST": os.getenv("DB_HOST"),
-        "PORT": os.getenv("DB_PORT"),
+        "ENGINE": os.environ.get("DB_ENGINE"),
+        "NAME": os.environ.get("DB_NAME"),
+        "USER": os.environ.get("DB_USER"),
+        "PASSWORD": os.environ.get("DB_PASSWORD"),
+        "HOST": os.environ.get("DB_HOST"),
+        "PORT": os.environ.get("DB_PORT"),
     }
 }
 
-# DATABASES["default"] = dj_database_url.parse(os.getenv("DJ_DATABASE_URL"))
+# DATABASES["default"] = dj_database_url.parse(os.environ.get("DJ_DATABASE_URL"))
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -181,7 +181,7 @@ CELERY_BROKER_TRANSPORT_OPTIONS = {
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": os.getenv("REDIS_URL"),
+        "LOCATION": os.environ.get("REDIS_URL"),
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
             'SOCKET_CONNECT_TIMEOUT': 5,
@@ -189,20 +189,20 @@ CACHES = {
             'RETRY_ON_TIMEOUT': True,
             'SOCKET_KEEPALIVE': True,
         },
-        "KEY_PREFIX": os.getenv("CACHE_KEY_PREFIX"),
+        "KEY_PREFIX": os.environ.get("CACHE_KEY_PREFIX"),
     }
 }
 
 CELERY_RESULT_BACKEND = 'django-db'
 
 # Temps de vie par défaut pour cache analytics (en secondes)
-ANALYTICS_CACHE_TTL = int(os.getenv("ANALYTICS_CACHE_TTL"))
+ANALYTICS_CACHE_TTL = int(os.environ.get("ANALYTICS_CACHE_TTL"))
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = os.getenv("LANGUAGE_CODE")
-TIME_ZONE = os.getenv("TIME_ZONE")
+LANGUAGE_CODE = os.environ.get("LANGUAGE_CODE")
+TIME_ZONE = os.environ.get("TIME_ZONE")
 USE_I18N = True
 USE_TZ = True
 
@@ -210,10 +210,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = os.getenv("STATIC_URL")
+STATIC_URL = os.environ.get("STATIC_URL")
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-MEDIA_URL = os.getenv("MEDIA_URL")
+MEDIA_URL = os.environ.get("MEDIA_URL")
 MEDIA_ROOT = BASE_DIR / "media"
 
 # Default primary key field type
@@ -235,3 +235,4 @@ CSRF_TRUSTED_ORIGINS = [
     "https://ekigegabackend-production.up.railway.app",
 ]
 
+FRONTEND_URL = os.environ.get("FRONTEND_URL")

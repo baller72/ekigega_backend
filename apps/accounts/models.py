@@ -95,13 +95,13 @@ class PasswordResetToken(BaseModel):
         return not self.is_used and timezone.now() < self.expires_at
 
     @staticmethod
-    def create_for_user(user, expiry_hours=24):
+    def create_for_user(user, expiry_hours=1):
         """
         Cree ou met a jour un token de reset pour un utilisateur.
         
         Args:
             user: Utilisateur pour lequel creer le token
-            expiry_hours: Nombre d'heures avant expiration (defaut: 24)
+            expiry_hours: Nombre d'heures avant expiration (defaut: 1 heure)
         
         Returns:
             Token cree ou mis a jour
